@@ -12,8 +12,11 @@ module sid_acc(
     input   clk, clk_en, n_reset
 );
 
-bit [23:0]  acc_next;
-bit [22:0]  lfsr_next;
+bit sync_out = 0;
+bit[23:0] acc = 0;
+bit[22:0] lfsr = '1;
+bit [23:0] acc_next;
+bit [22:0] lfsr_next;
 
 
 always_ff @(posedge clk, negedge n_reset)
@@ -33,7 +36,7 @@ end
 
 always_comb
 begin
-    acc_next = acc + freq;
+    acc_next = acc + {8'b0, freq};
     lfsr_next = { lfsr[21:0], lfsr[17] ^ lfsr[22] };
     
     if (sync && sync_in)
@@ -44,11 +47,8 @@ begin
         lfsr_next = '1;
     end
 
-    sync_out  = !acc[23] && acc_next[23];
+    sync_out = !acc[23] && acc_next[23];
 end
 
 
 endmodule
-
-
-

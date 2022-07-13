@@ -1,0 +1,34 @@
+### Clock
+set_io SYS_CLK J3
+
+### LEDs
+set_io LED_o1[0] B5
+set_io LED_o1[1] B4
+set_io LED_o1[2] A2
+set_io LED_o1[3] A1
+set_io LED_o2[0] C5
+set_io LED_o2[1] C4
+set_io LED_o2[2] B3
+set_io LED_o2[3] C3
+
+### Reset
+set_io RSTn_i N16 -pullup yes
+
+### Pins
+#set_io D14_i D14 -pullup yes
+#set_io D15_i D15 -pullup yes
+
+### Uart rx in
+#set_io GPIO_02 B16 -pullup yes
+
+### Audio out
+#set_io GPIO_04 D16
+#-pulldown yes
+
+### Audio out
+set_io dac[5] C16
+set_io dac[4] D16
+set_io dac[3] E16
+set_io dac[2] F16
+set_io dac[1] G16
+set_io dac[0] H16

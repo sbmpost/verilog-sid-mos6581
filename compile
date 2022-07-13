@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm obj_dir/* 2> /dev/null
+verilator -Wno-UNOPTFLAT -CFLAGS "-DVL_DEBUG=0 -Wno-write-strings" -cc sid_top.sv --exe sid.cpp

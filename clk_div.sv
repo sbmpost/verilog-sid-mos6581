@@ -6,7 +6,8 @@ module clk_div #(
 );
 
 
-bit[$clog2(DIVISOR)-1 : 0] div, div_next;
+bit clk_en_out;
+bit[$clog2(DIVISOR)-1 : 0] div = 0, div_next;
 
 
 always_ff @(posedge clk, negedge n_reset)

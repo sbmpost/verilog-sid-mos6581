@@ -8,7 +8,8 @@ module sigma_delta  #(
 );
 
 
-bit[N-1:0] acc, acc_next;
+bit out = 0;
+bit[N-1:0] acc = 0, acc_next;
 bit        out_next;
 
 
