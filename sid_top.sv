@@ -1,19 +1,16 @@
-module sid_top (
+module sid_top(
     input SYS_CLK,
     input RSTn_i,
-    output [3:0] LED_o1,
-    output [3:0] LED_o2,
-    output [5:0] dac
-//    ,
-//    output GPIO_04,
-//    input GPIO_02
+    output [7:0] LED_o,
+    output [5:0] dac,
+    input GPIO_02
 );
 
 wire sysclk;
 
 ///*
 wire locked;
-pll myPLL (
+pll myPLL(
     .clock_in(SYS_CLK),
     .clock_out(sysclk),
     .locked(locked)
@@ -34,14 +31,14 @@ reset_filter #(.DELAY(3)) rsf(
 
 
 bit     clk_en;     // 1MHz clock (for the SID chip)
-bit     clk_1k;     // 1kHz clock (for SignalTap)
+//bit     clk_1k;     // 1kHz clock (for SignalTap)
 
 ///*
 // original speeds based on 50MHZ clock
 clk_div #(.DIVISOR(50))     cd1(clk_en, sysclk, n_reset);
 
 // uart replacement clock for programming the sid registers
-clk_div #(.DIVISOR(1000000))  cd2(clk_1k, sysclk, n_reset);
+//clk_div #(.DIVISOR(1000000))  cd2(clk_1k, sysclk, n_reset);
 // clk_div #(.DIVISOR(50000))  cd2(clk_1k, sysclk, n_reset);
 //*/
 
@@ -65,12 +62,6 @@ mos6581 sid1(
     .n_reset( n_reset ),
     .clk( sysclk ),
     .clk_en( clk_en )
-//    ,
-//    .debug_out1( LED_o1[3:0] ),
-//    .debug_out2( LED_o2[3:0] )
-
-    // .debug_out( temp_LED_o[7:0] )
-    // .debug_in( SW ),
 );
 
 assign dac = audio_out[11:6];
@@ -90,137 +81,33 @@ sigma_delta  dac1(
 //
 bit [7:0] tdata;
 bit tvalid;
-/*
-uart_rx  rx(
+uart_rx rx(
     .clk(sysclk),
     .rst(!n_reset),
     .rxd(GPIO_02),
-//    .prescale( int'(50e6 / (115200 * 8) + 0.5) ),
-    .prescale( 12e6 / (115200 * 8) + 0.5 ),
+    .prescale( 55 ),
+//    .prescale( (int'(50e6 / (115200 * 8) + 0.5)) ),
 
     .output_axis_tdata(tdata),
     .output_axis_tvalid(tvalid),
     .output_axis_tready(1)
 );
-*/
 
-bit led_state;
-always_ff @(posedge clk_1k) begin
-    if (!n_reset) begin
-    end
-    else begin
-//        led_state <= ~led_state;
-//        tvalid <= led_state;
-        tvalid <= ~tvalid;
-    end
-end
+assign LED_o = tdata;
 
 bit rx_state;       // 0=reg, 1=data
 
-bit[3:0] bytes = 0;
-always_ff @(posedge clk_1k) // or negedge n_reset)
+always_ff @(posedge sysclk) // or negedge n_reset)
 begin
-/*
     if (!n_reset) begin
-        sid_addr <= 0; // 'h04;
-        sid_data <= 0; // 'h01;
+        sid_addr <= 0;
+        sid_data <= 0;
         rx_state <= 0;
     end
-    else
-*/
-    if (tvalid) begin
+    else if (tvalid) begin
         sid_n_cs <= 0;
-        unique case(bytes)
-            4'b0000: begin
-// $display("set volume", $time);
-                bytes <= 4'b0001;
-                sid_addr <= 'h18; // volume
-                sid_data <= 8;
-            end
-            4'b0001: begin
-// $display("set attack/decay", $time);
-                bytes <= 4'b0010;
-                sid_addr <= 'h05; // attack/decay
-                sid_data <= 190;
-            end
-            4'b0010: begin
-// $display("set sustain/release", $time);
-                bytes <= 4'b0011;
-                sid_addr <= 'h06; // sustain/release
-                sid_data <= 248;
-            end
-            4'b0011: begin
-// $display("set freq HI", $time);
-                bytes <= 4'b0100;
-                sid_addr <= 'h01; // note freq_HI
-                sid_data <= 17;
-            end
-            4'b0100: begin
-// $display("set freq LO", $time);
-                bytes <= 4'b0101;
-                sid_addr <= 'h00; // note freq_LO
-                sid_data <= 37;
-            end
-            4'b0101: begin
-// $display("set pulse LO", $time);
-                bytes <= 4'b0110;
-//                sid_addr <= 'h02; // pulse width LO
-//                sid_data <= 0;
-            end
-            4'b0110: begin
-// $display("set pulse HI", $time);
-                bytes <= 4'b0111;
-//                sid_addr <= 'h03; // pulse width HI
-//                sid_data <= 'h08;
-            end
-            4'b0111: begin
-// $display("set waveform", $time);
-                bytes <= 4'b1000;
-                sid_addr <= 'h04; // waveform
-                sid_data <= 17; // gate bit + 16 = triangle, 32 = saw, 64 = pulse, 128 = noise
-            end
-
-// ----------------------------------------------------------
-
-            4'b1000: begin
-                bytes <= 4'b1001;
-//                sid_addr <= 'h18; // volume
-//                sid_data <= 8;
-            end
-            4'b1001: begin
-                bytes <= 4'b1010;
-                sid_addr <= 'h07 + 'h0C; // attack/decay
-                sid_data <= 190;
-            end
-            4'b1010: begin
-                bytes <= 4'b1011;
-                sid_addr <= 'h07 + 'h0D; // sustain/release
-                sid_data <= 248;
-            end
-            4'b1011: begin
-                bytes <= 4'b1100;
-                sid_addr <= 'h07 + 'h08; // note freq_HI
-                sid_data <= 17;
-            end
-            4'b1100: begin
-                bytes <= 4'b1101;
-                sid_addr <= 'h07 + 'h07; // note freq_LO
-                sid_data <= 37;
-            end
-            4'b1101: begin
-                bytes <= 4'b1110;
-            end
-            4'b1110: begin
-                bytes <= 4'b1111;
-                sid_addr <= 'h07 + 'h0B; // waveform
-                sid_data <= 33; // gate bit + 16 = triangle, 32 = saw, 64 = pulse, 128 = noise
-            end
-            default: begin
-            end
-        endcase
-/*
         if (rx_state == 0) begin
-            sid_addr <= tdata;
+            sid_addr <= tdata[4:0];
             if (tdata <= 'h1F)
                 rx_state <= 1;
         end
@@ -229,10 +116,8 @@ begin
             sid_n_cs <= 0;
             rx_state <= 0;
         end
-*/
     end
     else begin
-// $display("not within tvalid", $time);
         sid_n_cs <= 1;
     end
 end

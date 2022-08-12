@@ -2,14 +2,14 @@
 set_io SYS_CLK J3
 
 ### LEDs
-set_io LED_o1[0] B5
-set_io LED_o1[1] B4
-set_io LED_o1[2] A2
-set_io LED_o1[3] A1
-set_io LED_o2[0] C5
-set_io LED_o2[1] C4
-set_io LED_o2[2] B3
-set_io LED_o2[3] C3
+set_io LED_o[0] B5
+set_io LED_o[1] B4
+set_io LED_o[2] A2
+set_io LED_o[3] A1
+set_io LED_o[4] C5
+set_io LED_o[5] C4
+set_io LED_o[6] B3
+set_io LED_o[7] C3
 
 ### Reset
 set_io RSTn_i N16 -pullup yes
@@ -19,7 +19,8 @@ set_io RSTn_i N16 -pullup yes
 #set_io D15_i D15 -pullup yes
 
 ### Uart rx in
-#set_io GPIO_02 B16 -pullup yes
+#set_io GPIO_02 G14 -pullup yes
+set_io GPIO_02 B10 -pullup yes
 
 ### Audio out
 #set_io GPIO_04 D16
