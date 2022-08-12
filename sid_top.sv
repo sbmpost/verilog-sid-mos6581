@@ -3,7 +3,8 @@ module sid_top (
     input RSTn_i,
     output [3:0] LED_o1,
     output [3:0] LED_o2,
-    output [5:0] dac,
+    output [5:0] dac
+//    ,
 //    output GPIO_04,
 //    input GPIO_02
 );
@@ -63,10 +64,10 @@ mos6581 sid1(
     .rw  ( 0 ),
     .n_reset( n_reset ),
     .clk( sysclk ),
-    .clk_en( clk_en ),
-
-    .debug_out1( LED_o1[3:0] ),
-    .debug_out2( LED_o2[3:0] )
+    .clk_en( clk_en )
+//    ,
+//    .debug_out1( LED_o1[3:0] ),
+//    .debug_out2( LED_o2[3:0] )
 
     // .debug_out( temp_LED_o[7:0] )
     // .debug_in( SW ),
@@ -163,20 +164,56 @@ begin
             4'b0101: begin
 // $display("set pulse LO", $time);
                 bytes <= 4'b0110;
-                sid_addr <= 'h02; // pulse width LO
-                sid_data <= 0;
+//                sid_addr <= 'h02; // pulse width LO
+//                sid_data <= 0;
             end
             4'b0110: begin
 // $display("set pulse HI", $time);
                 bytes <= 4'b0111;
-                sid_addr <= 'h03; // pulse width HI
-                sid_data <= 'h08;
+//                sid_addr <= 'h03; // pulse width HI
+//                sid_data <= 'h08;
             end
             4'b0111: begin
 // $display("set waveform", $time);
                 bytes <= 4'b1000;
                 sid_addr <= 'h04; // waveform
                 sid_data <= 17; // gate bit + 16 = triangle, 32 = saw, 64 = pulse, 128 = noise
+            end
+
+// ----------------------------------------------------------
+
+            4'b1000: begin
+                bytes <= 4'b1001;
+//                sid_addr <= 'h18; // volume
+//                sid_data <= 8;
+            end
+            4'b1001: begin
+                bytes <= 4'b1010;
+                sid_addr <= 'h07 + 'h0C; // attack/decay
+                sid_data <= 190;
+            end
+            4'b1010: begin
+                bytes <= 4'b1011;
+                sid_addr <= 'h07 + 'h0D; // sustain/release
+                sid_data <= 248;
+            end
+            4'b1011: begin
+                bytes <= 4'b1100;
+                sid_addr <= 'h07 + 'h08; // note freq_HI
+                sid_data <= 17;
+            end
+            4'b1100: begin
+                bytes <= 4'b1101;
+                sid_addr <= 'h07 + 'h07; // note freq_LO
+                sid_data <= 37;
+            end
+            4'b1101: begin
+                bytes <= 4'b1110;
+            end
+            4'b1110: begin
+                bytes <= 4'b1111;
+                sid_addr <= 'h07 + 'h0B; // waveform
+                sid_data <= 33; // gate bit + 16 = triangle, 32 = saw, 64 = pulse, 128 = noise
             end
             default: begin
             end
