@@ -1,15 +1,14 @@
 module sigma_delta  #(
     N = 16
 )(
-    output          out,
+    output bit      out,
     input[N-1:0]    in,
     input           n_reset,
     input           clk
 );
 
 
-bit out = 0;
-bit[N-1:0] acc = 0, acc_next;
+bit[N-1:0] acc, acc_next;
 bit        out_next;
 
 

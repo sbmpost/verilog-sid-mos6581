@@ -1,21 +1,20 @@
 module sid_filter(
-    output[15:0]    audio_out,
-    input[11:0]     v_0,
-    input[11:0]     v_1,
-    input[11:0]     v_2,
-    input[10:0]     reg_fc,
-    input[3:0]      reg_res,
-    input[3:0]      reg_en,
-    input           reg_off3, reg_hp, reg_bp, reg_lp,
-    input[3:0]      reg_vol,
-    input           clk, clk_en, n_reset
+    output bit[15:0] audio_out,
+    input[11:0]      v_0,
+    input[11:0]      v_1,
+    input[11:0]      v_2,
+    input[10:0]      reg_fc,
+    input[3:0]       reg_res,
+    input[3:0]       reg_en,
+    input            reg_off3, reg_hp, reg_bp, reg_lp,
+    input[3:0]       reg_vol,
+    input            clk, clk_en, n_reset
 );
 
-bit[15:0] audio_out = 0;
 
-int low = 0, low_next;
-int band = 0, band_next;
-int high = 0, high_next;
+int low, low_next;
+int band, band_next;
+int high, high_next;
 
 int out_next;
 
@@ -78,7 +77,8 @@ begin
     if (out_next > 65535)
         out_next = 65535;
 
-    out_next = (out_next * reg_vol) >> 4;
+    // out_next = (out_next * reg_vol) >> 4;
+    out_next = (out_next * reg_vol) >> 2;
 end
 
 

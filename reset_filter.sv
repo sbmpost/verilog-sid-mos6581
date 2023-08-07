@@ -3,13 +3,12 @@ module reset_filter
     DELAY = 2
 ) (
     input   n_reset_in,
-    output  n_reset_out,
+    output bit n_reset_out,
     input   clk
 );
 
 
-bit n_reset_out;
-bit[DELAY-1:0] delay = '0;
+bit[DELAY-1:0] delay;
 
 
 always_ff @(posedge clk, negedge n_reset_in)

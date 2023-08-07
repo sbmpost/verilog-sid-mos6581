@@ -1,13 +1,11 @@
 module sid_env (
-    output[7:0]  vol,
+    output bit[7:0]  vol,
     input [3:0]  atk, dcy, stn, rls,
     input   gate,
-    
+
     input   clk, clk_en, n_reset
 );
 
-
-bit[7:0] vol = 0;
 
 // TODO: Good practice?
 typedef enum bit[1:0] {
@@ -48,13 +46,13 @@ initial begin
 end
 
 
-state_t     state = RELEASE, state_next;
+state_t     state, state_next;
 
 bit[7:0]    vol_next;
-bit[14:0]   lfsr = '1, lfsr_next;
+bit[14:0]   lfsr, lfsr_next;
 
-bit[4:0]    exp_counter = 0, exp_counter_next;
-bit[4:0]    exp_period = 1, exp_period_next;
+bit[4:0]    exp_counter, exp_counter_next;
+bit[4:0]    exp_period, exp_period_next;
 
 
 always_ff @(posedge clk, negedge n_reset)

@@ -1,17 +1,16 @@
 module clk_div #(
-    DIVISOR = 16  
+    DIVISOR = 16
 ) (
-    output clk_en_out,
+    output bit clk_en_out,
     input  clk, n_reset
 );
 
 
-bit clk_en_out;
-bit[$clog2(DIVISOR)-1 : 0] div = 0, div_next;
+bit[$clog2(DIVISOR)-1 : 0] div, div_next;
 
 
 always_ff @(posedge clk, negedge n_reset)
-begin 
+begin
     if (!n_reset)
         div <= 0;
     else
@@ -19,7 +18,7 @@ begin
 end
 
 
-always_comb 
+always_comb
 begin
     if (div == 0) begin
         div_next = DIVISOR - 1;

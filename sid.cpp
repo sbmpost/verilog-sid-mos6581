@@ -29,7 +29,7 @@ int main(int argc, char **argv, char **env) {
 
     sid->RSTn_i = 0x01;
 
-    while (main_time < 50000*4 && !Verilated::gotFinish()) {
+    while (main_time < 3553*4 && !Verilated::gotFinish()) {
         sid->eval();
 
         if ((main_time % 2) == 0) {
@@ -43,17 +43,15 @@ int main(int argc, char **argv, char **env) {
     #if VM_TRACE
         if (tfp) tfp->dump (main_time);
     #endif
-///*
+/*
         if (sid->SYS_CLK) {
-            VL_PRINTF ("%03d clk:%03d o1:%02d o2:%02d audio:%d\n",
+            VL_PRINTF ("%03d clk:%03d dac:%d\n",
                 main_time/2,
                 sid->SYS_CLK,
-                sid->LED_o1,
-                sid->LED_o2,
-                sid->GPIO_04
+                sid->dac
             );
         }
-//*/
+*/
         main_time++;
     }
 
