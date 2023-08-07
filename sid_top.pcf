@@ -23,8 +23,7 @@ set_io RSTn_i N16 -pullup yes
 set_io GPIO_02 B10 -pullup yes
 
 ### Audio out
-#set_io GPIO_04 D16
-#-pulldown yes
+set_io GPIO_04 J15
 
 ### Audio out
 set_io dac[5] C16
