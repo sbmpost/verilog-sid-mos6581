@@ -8,7 +8,7 @@ module sid_top(
 );
 
 //`ifdef VERILATOR
-//`define MEMORY
+`define MEMORY
 //`endif
 
 wire sysclk;
@@ -74,6 +74,9 @@ reset_filter #(.DELAY(3)) rsf(
 bit     clk_en;     // 1MHz clock (for the SID chip)
 clk_div #(.DIVISOR(52))     cd1(clk_en, slowclk, n_reset);
 
+bit     clk_mem;
+clk_div #(.DIVISOR(380000)) cd2(clk_mem, slowclk, n_reset);
+
 /*
 always_ff @(posedge clk_en, negedge n_reset)
 begin
@@ -130,6 +133,38 @@ bit [7:0] tdata;
       .data_in  (0),
       .data_out (tdata)
   );
+
+  bit sending = 0;
+  bit[1:0] tx_state = 0;
+  always_ff @(posedge slowclk, negedge n_reset)
+  begin
+      if (!n_reset) begin
+          address <= 0;
+          tvalid <= 0;
+      end
+      else if (clk_mem || sending) begin
+          if (clk_mem) begin
+              sending <= 1;
+          end
+          if (tx_state == 0 || tx_state == 2) begin
+              tvalid <= 1;
+          end
+          else if (tx_state == 1 || tx_state == 3) begin
+              if (address == 12'h0500) begin
+                  address <= 0;
+              end
+              else begin
+                  address <= address + 1;
+              end
+
+              tvalid <= 0;
+              if (tx_state == 3) begin
+                  sending <= 0;
+              end
+          end
+          tx_state = tx_state + 1;
+      end
+  end
 `else
   uart_rx rx(
       .clk(sysclk),
@@ -148,7 +183,7 @@ bit [7:0] tdata;
   assign LED_o = tdata;
 `endif
 
-bit rx_state = 1;       // 1=reg, 0=data
+bit rx_state;       // 0=reg, 1=data
 
 always_ff @(posedge slowclk, negedge n_reset)
 begin
@@ -156,42 +191,26 @@ begin
     if (!n_reset) begin
         $display("reset data transfer");
 //        LED_o[7:3] <= 0;
-        rx_state <= 1;
         sid_n_cs <= 1;
-`ifdef MEMORY
-        address <= 0;
-        tvalid <= 0;
-`endif
+        rx_state <= 0;
     end
     else if (tvalid) begin
-        if (rx_state) begin
+        if (rx_state == 0) begin
+            // LED_o[7:3] <= {tdata[0], tdata[1], tdata[2], tdata[3], tdata[4]};
+            sid_addr <= tdata[4:0];
             if (tdata <= 'h1F) begin
-                // LED_o[7:3] <= {tdata[0], tdata[1], tdata[2], tdata[3], tdata[4]};
-                sid_addr <= tdata[4:0];
-                rx_state <= 0;
+                rx_state <= 1;
             end
-`ifdef MEMORY
-        address <= address + 1;
-        tvalid <= 0;
-`endif
         end
         else begin
             // LED_o[7:4] <= tdata[7:4];
             sid_data <= tdata;
-//if (clk_en) begin
-            rx_state <= 1;
-`ifdef MEMORY
-        address <= address + 1;
-        tvalid <= 0;
-`endif
-//end
+            sid_n_cs <= 0;
+            rx_state <= 0;
         end
-        sid_n_cs <= rx_state;
     end
     else begin
-`ifdef MEMORY
-        tvalid <= 1;
-`endif
+        sid_n_cs <= 1;
     end
 end
 
