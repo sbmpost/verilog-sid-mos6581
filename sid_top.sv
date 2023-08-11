@@ -7,6 +7,10 @@ module sid_top(
     output GPIO_04
 );
 
+//`ifdef VERILATOR
+//`define MEMORY
+//`endif
+
 wire sysclk;
 
 `ifdef VERILATOR
@@ -116,71 +120,78 @@ sigma_delta  dac1(
 
 bit tvalid;
 bit [7:0] tdata;
-///*
-// UART receiver
-uart_rx rx(
-    .clk(sysclk),
-    .rst(!n_reset),
-    .rxd(GPIO_02),
-//    .prescale( 65 ),
-    .prescale( 55 ),
-//    .prescale( 27 ),
-//    .prescale( (int'(50e6 / (115200 * 8) + 0.5)) ),
 
-    .output_axis_tdata(tdata),
-    .output_axis_tvalid(tvalid),
-    .output_axis_tready(1)
-);
+`ifdef MEMORY
+  bit [11:0] address;
+  sid_mem mem(
+      .clk      (slowclk),
+      .w_enable (0),
+      .address  (address),
+      .data_in  (0),
+      .data_out (tdata)
+  );
+`else
+  uart_rx rx(
+      .clk(sysclk),
+      .rst(!n_reset),
+      .rxd(GPIO_02),
+//      .prescale( 65 ),
+      .prescale( 55 ),
+//      .prescale( 27 ),
+//      .prescale( (int'(50e6 / (115200 * 8) + 0.5)) ),
 
-assign LED_o = tdata;
-//*/
+      .output_axis_tdata(tdata),
+      .output_axis_tvalid(tvalid),
+      .output_axis_tready(1)
+  );
 
-bit rx_state = 0;       // 0=reg, 1=data
+  assign LED_o = tdata;
+`endif
 
-/*
-bit [11:0] address;
-sid_mem mem(
-    .clk      (slowclk),
-    .w_enable (0),
-    .address  (address),
-    .data_in  (0),
-    .data_out (tdata)
-);
-*/
+bit rx_state = 1;       // 1=reg, 0=data
 
 always_ff @(posedge slowclk, negedge n_reset)
 begin
-    $display("time: %d, clk_en: %d, audio %d, tvalid: %d", $time, clk_en, audio_out, tvalid);
+    $display("time: %d, clk_en: %d, sid_n_cs: %d, audio %d, tvalid: %d, rx_state:%d", $time, clk_en, sid_n_cs, audio_out, tvalid, rx_state);
     if (!n_reset) begin
         $display("reset data transfer");
 //        LED_o[7:3] <= 0;
-        rx_state <= 0;
+        rx_state <= 1;
         sid_n_cs <= 1;
-//        address <= 0;
-//        tvalid <= 0;
+`ifdef MEMORY
+        address <= 0;
+        tvalid <= 0;
+`endif
     end
     else if (tvalid) begin
-        if (rx_state == 0) begin
+        if (rx_state) begin
             if (tdata <= 'h1F) begin
-//                LED_o[7:3] <= {tdata[0], tdata[1], tdata[2], tdata[3], tdata[4]};
+                // LED_o[7:3] <= {tdata[0], tdata[1], tdata[2], tdata[3], tdata[4]};
                 sid_addr <= tdata[4:0];
-                rx_state <= 1;
-//                address <= address + 1;
-//                tvalid <= 0;
+                rx_state <= 0;
             end
+`ifdef MEMORY
+        address <= address + 1;
+        tvalid <= 0;
+`endif
         end
         else begin
             // LED_o[7:4] <= tdata[7:4];
             sid_data <= tdata;
-            rx_state <= 0;
-            sid_n_cs <= 0;
-//            address <= address + 1;
-//            tvalid <= 0;
+//if (clk_en) begin
+            rx_state <= 1;
+`ifdef MEMORY
+        address <= address + 1;
+        tvalid <= 0;
+`endif
+//end
         end
+        sid_n_cs <= rx_state;
     end
     else begin
-        sid_n_cs <= 1;
-//        tvalid <= 1;
+`ifdef MEMORY
+        tvalid <= 1;
+`endif
     end
 end
 
