@@ -21,7 +21,7 @@ begin
     };
 */
     out_pulse    = acc[23:12] < pw ? '1 : '0;
-//    out_pulse    = acc[23:12] < pw ? '0 : '1;
+//    out_pulse    = acc[23:12] > pw ? '1 : '0;
 /*
     out_saw      = acc[23:12];
     out_triangle = {1'b0, acc[22:12]} << 1;

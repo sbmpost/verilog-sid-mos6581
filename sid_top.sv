@@ -7,57 +7,57 @@ module sid_top(
     output GPIO_04
 );
 
-//`ifdef VERILATOR
+`ifdef VERILATOR
 `define MEMORY
-//`endif
+`endif
 
 wire sysclk;
 
 `ifdef VERILATOR
-  assign sysclk = SYS_CLK;
+    assign sysclk = SYS_CLK;
+`endif
+
+`ifdef SLOW_CLK
+    assign sysclk = SYS_CLK;
 `else
-//  assign sysclk = SYS_CLK;
-///*
-  wire locked;
-  pll myPLL(
-      .clock_in(SYS_CLK),
-      .clock_out(sysclk),
-      .locked(locked)
-  );
-//*/
+`ifndef VERILATOR
+    wire locked;
+    pll myPLL(
+        .clock_in(SYS_CLK),
+        .clock_out(sysclk),
+        .locked(locked)
+    );
+`endif
 `endif
 
 bit slowclk;
 
-`ifdef VERILATOR
-  assign slowclk = sysclk;
+`ifdef SLOW_CLK
+    int count;
+    always_ff @(posedge sysclk)
+    begin
+        if (!RSTn_i) begin
+            LED_o[0] <= 0;
+            slowclk <= 0;
+            count <= 0;
+        end
+        else begin
+            count <= count + 1;
+            if (count == 12000000) begin
+                count <= 0;
+                if (slowclk) begin
+                    LED_o[0] <= 0;
+                    slowclk <= 0;
+                end
+                else begin
+                    LED_o[0] <= 1;
+                    slowclk <= 1;
+                end
+            end
+        end
+    end
 `else
-  assign slowclk = sysclk;
-/*
-  int count;
-  always_ff @(posedge sysclk)
-  begin
-      if (!RSTn_i) begin
-          LED_o[0] <= 0;
-          slowclk <= 0;
-          count <= 0;
-      end
-      else begin
-          count <= count + 1;
-          if (count == 12000000) begin
-              count <= 0;
-              if (slowclk) begin
-                  LED_o[0] <= 0;
-                  slowclk <= 0;
-              end
-              else begin
-                  LED_o[0] <= 1;
-                  slowclk <= 1;
-              end
-          end
-      end
-  end
-*/
+    assign slowclk = sysclk;
 `endif
 
 // Synchronize reset release to sysclk
@@ -65,32 +65,33 @@ bit slowclk;
 bit n_reset;
 
 reset_filter #(.DELAY(3)) rsf(
-    .n_reset_in( RSTn_i ),
-    .n_reset_out( n_reset ),
+    .n_reset_in(RSTn_i),
+    .n_reset_out(n_reset),
     .clk(slowclk)
 );
 
 // original speeds based on 50MHZ clock
-bit     clk_en;     // 1MHz clock (for the SID chip)
-clk_div #(.DIVISOR(52))     cd1(clk_en, slowclk, n_reset);
+bit clk_en; // 1MHz clock (for the SID chip)
+//clk_div #(.DIVISOR(60)) cd1(clk_en, slowclk, n_reset);
+//clk_div #(.DIVISOR(52)) cd1(clk_en, slowclk, n_reset);
+//clk_div #(.DIVISOR(104)) cd1(clk_en, slowclk, n_reset);
+clk_div #(.DIVISOR(50)) cd1(clk_en, slowclk, n_reset);
 
-bit     clk_mem;
+`ifdef MEMORY
+bit clk_mem;
 clk_div #(.DIVISOR(380000)) cd2(clk_mem, slowclk, n_reset);
 
-/*
-always_ff @(posedge clk_en, negedge n_reset)
+always_ff @(posedge slowclk, negedge n_reset)
 begin
     if (!n_reset) begin
         LED_o[1] <= 0;
     end
-    else begin
+    else if (clk_mem) begin
         LED_o[1] <= ~LED_o[1];
     end
 end
-*/
+`endif
 
-// SID Emulation
-//
 bit[15:0]   audio_out;
 bit[4:0]    sid_addr;
 bit[7:0]    sid_data;
@@ -110,9 +111,6 @@ mos6581 sid1(
 assign dac = audio_out[11:6];
 // assign dac = audio_out[5:0];
 
-///*
-// Sigma/Delta DAC
-//
 sigma_delta  dac1(
     .in     ( audio_out ),
     .out    ( GPIO_04 ),
@@ -150,6 +148,7 @@ bit [7:0] tdata;
               tvalid <= 1;
           end
           else if (tx_state == 1 || tx_state == 3) begin
+//              if (address == 12'h0de0) begin
               if (address == 12'h0500) begin
                   address <= 0;
               end
@@ -167,20 +166,24 @@ bit [7:0] tdata;
   end
 `else
   uart_rx rx(
-      .clk(sysclk),
+      .clk(slowclk),
       .rst(!n_reset),
       .rxd(GPIO_02),
 //      .prescale( 65 ),
-      .prescale( 55 ),
+      .prescale( 54 ),
+//      .prescale( 109 ),
 //      .prescale( 27 ),
 //      .prescale( (int'(50e6 / (115200 * 8) + 0.5)) ),
 
       .output_axis_tdata(tdata),
       .output_axis_tvalid(tvalid),
-      .output_axis_tready(1)
+      .output_axis_tready(1),
+      .busy(LED_o[0]),
+      .overrun_error(LED_o[1]),
+      .frame_error(LED_o[2])
   );
 
-  assign LED_o = tdata;
+//  assign LED_o = tdata;
 `endif
 
 bit rx_state;       // 0=reg, 1=data
