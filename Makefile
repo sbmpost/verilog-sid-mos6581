@@ -5,8 +5,7 @@ DEVICE    = 8k
 FOOTPRINT = ct256
 
 # Files
-#FILES = sid_top.sv clk_div.sv reset_filter.sv pll.sv
-FILES = sid_top.sv sid_mem16.sv mos6581.sv voice.sv clk_div.sv reset_filter.sv sid_acc.sv sid_env.sv sid_filter.sv sid_wave.sv sigma_delta.sv uart_rx.sv pll.sv
+FILES = sid_top.sv sid_mem16.sv mos6581.sv sid_voice.sv clk_div.sv reset_filter.sv sid_acc.sv sid_env.sv sid_filter.sv sid_wave.sv sigma_delta.sv uart_rx.sv pll.sv
 
 .PHONY: all clean burn
 

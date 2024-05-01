@@ -20,23 +20,23 @@ always_ff @(posedge clk, negedge n_reset)
 begin
     if (!n_reset) begin
         acc <= 0;
-        //lfsr <= '1;
+        lfsr <= '1;
     end
     else if (clk_en) begin
         acc <= acc_next;
-        /*
+        ///*
         if (!acc[19] && acc_next[19])
-            lfsr <= lfsr_next;*/
+            lfsr <= lfsr_next;//*/
     end
 end
 
 
 always_comb
 begin
-    acc_next = acc + {8'b0, freq};/*
+    acc_next = acc + {8'b0, freq};///*
     lfsr_next = { lfsr[21:0], lfsr[17] ^ lfsr[22] };
 
-    if (sync && sync_in)
+    if (sync)// && sync_in)
         acc_next = 0;
 
     if (test) begin
@@ -44,7 +44,7 @@ begin
         lfsr_next = '1;
     end
 
-    sync_out = !acc[23] && acc_next[23];*/
+    sync_out = !acc[23] && acc_next[23];//*/
 end
 
 

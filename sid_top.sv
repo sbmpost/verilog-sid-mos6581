@@ -93,13 +93,15 @@ begin
     else if (cycles == 0 || mem_state != 0) begin
         if (mem_state == 0) begin
             cycles <= {data,4'b0} + {data,5'b0} - 4;
-            address <= address + 1;
+            if (address <= 13'd1412) // n_reset <= 1'b0;
+                address <= address + 1;
             sid_n_cs <= 1;
         end
         else if (mem_state == 2) begin
             sid_addr <= data[4:0];
             sid_data <= data[15:8];
-            address <= address + 1;
+            if (address <= 13'd1412) // n_reset <= 1'b0;
+                address <= address + 1;
             sid_n_cs <= 0;
         end
         else begin
