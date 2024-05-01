@@ -5,7 +5,7 @@ module sid_filter(
     input[11:0]      v_2,
     input[10:0]      reg_fc,
     input[3:0]       reg_res,
-    input[3:0]       reg_en,
+    input[2:0]       reg_en,
     input            reg_off3, reg_hp, reg_bp, reg_lp,
     input[3:0]       reg_vol,
     input            clk, clk_en, n_reset

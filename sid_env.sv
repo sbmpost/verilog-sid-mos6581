@@ -27,22 +27,22 @@ const bit[14:0] adsrtable[16] = '{
 
 bit[14:0] adsrtable[16];
 initial begin
-    adsrtable[0]=15'h007F;
-    adsrtable[1]=15'h3000;
-    adsrtable[2]=15'h1E00;
-    adsrtable[3]=15'h0660;
-    adsrtable[4]=15'h0182;
-    adsrtable[5]=15'h5573;
-    adsrtable[6]=15'h000E;
-    adsrtable[7]=15'h3805;
-    adsrtable[8]=15'h2424;
-    adsrtable[9]=15'h2220;
-    adsrtable[10]=15'h090C;
-    adsrtable[11]=15'h0ECD;
-    adsrtable[12]=15'h010E;
-    adsrtable[13]=15'h23F7;
-    adsrtable[14]=15'h5237;
-    adsrtable[15]=15'h64A8;
+    adsrtable[4'd0]=15'h007F;
+    adsrtable[4'd1]=15'h3000;
+    adsrtable[4'd2]=15'h1E00;
+    adsrtable[4'd3]=15'h0660;
+    adsrtable[4'd4]=15'h0182;
+    adsrtable[4'd5]=15'h5573;
+    adsrtable[4'd6]=15'h000E;
+    adsrtable[4'd7]=15'h3805;
+    adsrtable[4'd8]=15'h2424;
+    adsrtable[4'd9]=15'h2220;
+    adsrtable[4'd10]=15'h090C;
+    adsrtable[4'd11]=15'h0ECD;
+    adsrtable[4'd12]=15'h010E;
+    adsrtable[4'd13]=15'h23F7;
+    adsrtable[4'd14]=15'h5237;
+    adsrtable[4'd15]=15'h64A8;
 end
 
 

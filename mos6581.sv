@@ -114,22 +114,22 @@ clk, clk_en, n_reset);
 assign audio_out = {4'b0000, v_0_out + v_1_out + v_2_out};
 
 /*
-sid_filter  filt(
-    .audio_out(audio_out),
-    .v_0( v_0_out ),
-    .v_1( v_1_out ),
-    .v_2( v_2_out ),
-    .reg_fc     ( filter.fc     ),
-    .reg_res    ( filter.res    ),
-    .reg_en     ( filter.filt   ),
-    .reg_off3   ( filter.off3   ),
-    .reg_hp     ( filter.hp     ),
-    .reg_bp     ( filter.bp     ),
-    .reg_lp     ( filter.lp     ),
-    .reg_vol    ( filter.vol    ),
-    .clk(clk),
-    .clk_en(clk_en),
-    .n_reset(n_reset)
+sid_filter filt(
+    .audio_out (audio_out),
+    .v_0       ( v_0_out ),
+    .v_1       ( v_1_out ),
+    .v_2       ( v_2_out ),
+    .reg_fc    ( filter.fc        ),
+    .reg_res   ( filter.res       ),
+    .reg_en    ( filter.filt[2:0] ),
+    .reg_off3  ( filter.off3      ),
+    .reg_hp    ( filter.hp        ),
+    .reg_bp    ( filter.bp        ),
+    .reg_lp    ( filter.lp        ),
+    .reg_vol   ( filter.vol       ),
+    .clk       (clk),
+    .clk_en    (clk_en),
+    .n_reset   (n_reset)
 );
 */
 

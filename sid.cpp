@@ -29,7 +29,7 @@ int main(int argc, char **argv, char **env) {
 
     sid->RSTn_i = 0x01;
 
-    while (main_time < 3553*4 && !Verilated::gotFinish()) {
+    while (main_time < 32860 && !Verilated::gotFinish()) {
         sid->eval();
 
         if ((main_time % 2) == 0) {
